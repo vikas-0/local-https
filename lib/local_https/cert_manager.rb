@@ -24,6 +24,7 @@ module LocalHttps
 
     def ensure_mkcert!
       return true if system("which mkcert > /dev/null 2>&1")
+
       raise "mkcert is required but not found. Please run install.sh or install mkcert manually."
     end
 
@@ -45,12 +46,14 @@ module LocalHttps
     # Generate a bundle cert that includes all domains (optional optimization)
     def ensure_combined_cert!(domains)
       return if domains.empty?
+
       combined = File.join(CERTS_DIR, "combined.pem")
       combined_key = File.join(CERTS_DIR, "combined-key.pem")
       return if File.exist?(combined) && File.exist?(combined_key)
+
       ensure_mkcert!
       cmd = [
-        "mkcert", "-cert-file", combined, "-key-file", combined_key,
+        "mkcert", "-cert-file", combined, "-key-file", combined_key
       ] + domains
       system(*cmd) or raise "Failed to generate combined certificate"
     end

@@ -4,11 +4,12 @@ require "tempfile"
 
 module LocalHttps
   class DnsManager
-    HOSTS_PATH = "/etc/hosts".freeze
-    MARKER = "# local-https".freeze
+    HOSTS_PATH = "/etc/hosts"
+    MARKER = "# local-https"
 
     def add_host!(domain)
       return if hosts_lines.any? { |l| l.include?(" #{domain}") }
+
       line = "127.0.0.1 #{domain} #{MARKER}"
       sh_with_sudo!("echo '#{line}' >> #{HOSTS_PATH}")
     end

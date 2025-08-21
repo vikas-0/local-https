@@ -8,7 +8,7 @@ module LocalHttps
   class Config
     DEFAULT_DIR = begin
       if ENV["LOCAL_HTTPS_HOME"]
-        File.expand_path(ENV["LOCAL_HTTPS_HOME"]) 
+        File.expand_path(ENV["LOCAL_HTTPS_HOME"])
       elsif ENV["SUDO_USER"] && Process.uid == 0
         File.join(Etc.getpwnam(ENV["SUDO_USER"]).dir, ".local-https")
       else
@@ -59,7 +59,7 @@ module LocalHttps
 
     def pid
       Integer(File.read(PID_PATH)) if File.exist?(PID_PATH)
-    rescue
+    rescue StandardError
       nil
     end
 
@@ -74,6 +74,7 @@ module LocalHttps
     def proxy_running?
       p = pid
       return false unless p
+
       Process.kill(0, p)
       true
     rescue Errno::ESRCH

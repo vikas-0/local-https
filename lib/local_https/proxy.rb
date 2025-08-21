@@ -20,9 +20,7 @@ module LocalHttps
     end
 
     def start!(bind: DEFAULT_BIND, port: DEFAULT_PORT, daemonize: true, redirect_http: true)
-      if daemonize
-        Process.daemon(true, true)
-      end
+      Process.daemon(true, true) if daemonize
 
       https_server = build_server(bind, port)
       http_server = nil
@@ -33,7 +31,7 @@ module LocalHttps
           warn "Permission denied binding to port 80 for HTTP redirect. Continuing without HTTP redirect."
         rescue Errno::EADDRINUSE
           warn "Port 80 is already in use. Continuing without HTTP redirect."
-        rescue => e
+        rescue StandardError => e
           warn "Failed to initialize HTTP redirect server: #{e.class}: #{e.message}"
         end
       end
@@ -41,24 +39,24 @@ module LocalHttps
       trap("INT") do
         begin
           https_server.shutdown
-        rescue => e
+        rescue StandardError => e
           warn "HTTPS server shutdown error: #{e.class}: #{e.message}"
         end
         begin
           http_server&.shutdown
-        rescue => e
+        rescue StandardError => e
           warn "HTTP redirect server shutdown error: #{e.class}: #{e.message}"
         end
       end
       trap("TERM") do
         begin
           https_server.shutdown
-        rescue => e
+        rescue StandardError => e
           warn "HTTPS server shutdown error: #{e.class}: #{e.message}"
         end
         begin
           http_server&.shutdown
-        rescue => e
+        rescue StandardError => e
           warn "HTTP redirect server shutdown error: #{e.class}: #{e.message}"
         end
       end
@@ -68,11 +66,9 @@ module LocalHttps
       # Start HTTP redirector in a thread (if available), then start HTTPS
       if http_server
         Thread.new do
-          begin
-            http_server.start
-          rescue => e
-            warn "HTTP redirector stopped: #{e.class}: #{e.message}"
-          end
+          http_server.start
+        rescue StandardError => e
+          warn "HTTP redirector stopped: #{e.class}: #{e.message}"
         end
       end
 
@@ -118,16 +114,14 @@ module LocalHttps
       # Build SNI config for all configured domains
       sni_config = {}
       domains.each do |d|
+        ensure_domain_cert!(d)
+        cert = OpenSSL::X509::Certificate.new(File.read(@cert_manager.cert_path(d)))
+        key  = OpenSSL::PKey.read(File.read(@cert_manager.key_path(d)))
+        sni_config[d] = { SSLCertificate: cert, SSLPrivateKey: key }
+      rescue StandardError => e
         begin
-          ensure_domain_cert!(d)
-          cert = OpenSSL::X509::Certificate.new(File.read(@cert_manager.cert_path(d)))
-          key  = OpenSSL::PKey.read(File.read(@cert_manager.key_path(d)))
-          sni_config[d] = { SSLCertificate: cert, SSLPrivateKey: key }
-        rescue => e
-          begin
-            $stderr.puts("[local-https] Skipping SNI for #{d}: #{e.class}: #{e.message}")
-          rescue
-          end
+          warn("[local-https] Skipping SNI for #{d}: #{e.class}: #{e.message}")
+        rescue StandardError
         end
       end
 
@@ -145,7 +139,13 @@ module LocalHttps
         RequestTimeout: 60,
         KeepAliveTimeout: 5,
         MaxClients: 128,
-        StartCallback: proc { $stdout.puts "local-https proxy listening on https://#{bind}:#{port}" rescue nil }
+        StartCallback: proc {
+          begin
+            $stdout.puts "local-https proxy listening on https://#{bind}:#{port}"
+          rescue StandardError
+            nil
+          end
+        }
       )
 
       httpd.mount_proc("/") do |req, res|
@@ -197,7 +197,11 @@ module LocalHttps
       end
 
       target_host = "127.0.0.1"
-      target_port = Integer(mapping["port"]) rescue Integer(mapping[:port])
+      target_port = begin
+        Integer(mapping["port"])
+      rescue StandardError
+        Integer(mapping[:port])
+      end
 
       uri = URI::HTTP.build(host: target_host, port: target_port, path: req.path)
 
@@ -208,17 +212,17 @@ module LocalHttps
         req.each do |k, v|
           kk = k.to_s.downcase
           next if HOP_BY_HOP.include?(kk)
+
           proxy_req[k] = v
         end
-        if req.body && !req.body.empty?
-          proxy_req.body = req.body
-        end
+        proxy_req.body = req.body if req.body && !req.body.empty?
 
         http.request(proxy_req) do |proxy_res|
           res.status = proxy_res.code.to_i
           proxy_res.each_header do |k, v|
             kk = k.to_s.downcase
             next if HOP_BY_HOP.include?(kk)
+
             res[k] = v
           end
           if proxy_res.body
@@ -233,7 +237,7 @@ module LocalHttps
           end
         end
       end
-    rescue => e
+    rescue StandardError => e
       res.status = 502
       res["content-type"] = "text/plain"
       res.body = "Proxy error: #{e.class}: #{e.message}\n"
@@ -255,11 +259,13 @@ module LocalHttps
     def ensure_domain_cert!(domain)
       # Generate for known mappings or localhost
       return if domain.nil? || domain.empty?
+
       if domain == "localhost"
         @cert_manager.generate!(domain) unless @cert_manager.have_cert?(domain)
         return
       end
       return unless @config.mappings.key?(domain)
+
       @cert_manager.generate!(domain)
     end
   end

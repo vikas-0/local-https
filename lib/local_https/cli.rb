@@ -14,7 +14,7 @@ module LocalHttps
       puts "Added mapping: #{domain} -> localhost:#{port}"
       puts "Certificate stored in ~/.local-https/certs"
       puts "Remember to run 'local-https start' (sudo may be required)"
-    rescue => e
+    rescue StandardError => e
       warn "Error: #{e.message}"
       exit 1
     end
@@ -27,7 +27,7 @@ module LocalHttps
       else
         puts "Mappings:"
         config.mappings.each do |domain, h|
-          puts " - #{domain} => localhost:#{h["port"] || h[:port]}"
+          puts " - #{domain} => localhost:#{h['port'] || h[:port]}"
         end
       end
       puts "Proxy running: #{config.proxy_running?}#{" (pid #{config.pid})" if config.proxy_running?}"
@@ -54,7 +54,7 @@ module LocalHttps
         end
       end
       puts "Removed mapping for #{domain} and stopped proxy. Run 'local-https start' to start again."
-    rescue => e
+    rescue StandardError => e
       warn "Error: #{e.message}"
       exit 1
     end

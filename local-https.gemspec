@@ -6,8 +6,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Vikas Kumar"]
   spec.email         = ["vikas_kr@live.in"]
 
-  spec.summary       = %q{Run any local app with HTTPS and a custom domain}
-  spec.description   = %q{A simple Ruby CLI that generates mkcert certificates, updates /etc/hosts, and runs a HTTPS reverse proxy to your localhost apps.}
+  spec.summary       = "Run any local app with HTTPS and a custom domain"
+  spec.description   = "A simple Ruby CLI that generates mkcert certificates, updates /etc/hosts, and runs a HTTPS reverse proxy to your localhost apps."
   spec.homepage      = "https://github.com/vikas-0/local-https"
   spec.license       = "MIT"
 
@@ -19,8 +19,8 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
   spec.required_ruby_version = ">= 3.0"
 
-  spec.add_runtime_dependency "thor", ">= 1.2", "< 2.0"
-  spec.add_runtime_dependency "webrick", ">= 1.8", "< 2.0"
+  spec.add_dependency "thor", ">= 1.2", "< 2.0"
+  spec.add_dependency "webrick", ">= 1.8", "< 2.0"
 
   spec.metadata = {
     "source_code_uri" => spec.homepage,
