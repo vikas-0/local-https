@@ -18,9 +18,10 @@ module LocalHttps
       File.join(CERTS_DIR, "#{domain}-key.pem")
     end
 
-    def have_cert?(domain)
+    def cert?(domain)
       File.exist?(cert_path(domain)) && File.exist?(key_path(domain))
     end
+    alias have_cert? cert?
 
     def ensure_mkcert!
       return true if system("which mkcert > /dev/null 2>&1")
@@ -30,7 +31,7 @@ module LocalHttps
 
     def generate!(domain)
       ensure_mkcert!
-      return if have_cert?(domain)
+      return if cert?(domain)
 
       cert = cert_path(domain)
       key  = key_path(domain)

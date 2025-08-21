@@ -13,6 +13,18 @@ module LocalHttps
   class Proxy
     DEFAULT_BIND = "0.0.0.0"
     DEFAULT_PORT = 443
+    HOP_BY_HOP = %w[
+      connection proxy-connection keep-alive transfer-encoding upgrade te trailer
+    ].freeze
+    NET_HTTP_CLASS = {
+      "GET" => Net::HTTP::Get,
+      "POST" => Net::HTTP::Post,
+      "PUT" => Net::HTTP::Put,
+      "DELETE" => Net::HTTP::Delete,
+      "PATCH" => Net::HTTP::Patch,
+      "HEAD" => Net::HTTP::Head,
+      "OPTIONS" => Net::HTTP::Options
+    }.freeze
 
     def initialize(config: Config.load, cert_manager: CertManager.new)
       @config = config
@@ -119,10 +131,7 @@ module LocalHttps
         key  = OpenSSL::PKey.read(File.read(@cert_manager.key_path(d)))
         sni_config[d] = { SSLCertificate: cert, SSLPrivateKey: key }
       rescue StandardError => e
-        begin
-          warn("[local-https] Skipping SNI for #{d}: #{e.class}: #{e.message}")
-        rescue StandardError
-        end
+        warn("[local-https] Skipping SNI for #{d}: #{e.class}: #{e.message}")
       end
 
       httpd = WEBrick::HTTPServer.new(
@@ -139,13 +148,7 @@ module LocalHttps
         RequestTimeout: 60,
         KeepAliveTimeout: 5,
         MaxClients: 128,
-        StartCallback: proc {
-          begin
-            $stdout.puts "local-https proxy listening on https://#{bind}:#{port}"
-          rescue StandardError
-            nil
-          end
-        }
+        StartCallback: proc { $stdout.puts "local-https proxy listening on https://#{bind}:#{port}" }
       )
 
       httpd.mount_proc("/") do |req, res|
@@ -181,10 +184,6 @@ module LocalHttps
 
       httpd
     end
-
-    HOP_BY_HOP = %w[
-      connection proxy-connection keep-alive transfer-encoding upgrade te trailer
-    ].freeze
 
     def handle_proxy(req, res)
       host = (req["host"] || "").split(":").first
@@ -244,16 +243,7 @@ module LocalHttps
     end
 
     def net_http_class(method)
-      case method.to_s.upcase
-      when "GET" then Net::HTTP::Get
-      when "POST" then Net::HTTP::Post
-      when "PUT" then Net::HTTP::Put
-      when "DELETE" then Net::HTTP::Delete
-      when "PATCH" then Net::HTTP::Patch
-      when "HEAD" then Net::HTTP::Head
-      when "OPTIONS" then Net::HTTP::Options
-      else Net::HTTP::Get
-      end
+      NET_HTTP_CLASS[method.to_s.upcase] || Net::HTTP::Get
     end
 
     def ensure_domain_cert!(domain)

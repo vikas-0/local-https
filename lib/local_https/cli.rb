@@ -48,7 +48,8 @@ module LocalHttps
         begin
           Process.kill("TERM", config.pid)
           sleep 0.2
-        rescue Errno::ESRCH, Errno::EPERM
+        rescue Errno::ESRCH, Errno::EPERM => e
+          warn "Could not signal proxy (pid #{config.pid}): #{e.class}: #{e.message}"
         ensure
           config.clear_pid!
         end
@@ -83,7 +84,8 @@ module LocalHttps
         begin
           Process.kill("TERM", config.pid)
           sleep 0.2
-        rescue Errno::ESRCH, Errno::EPERM
+        rescue Errno::ESRCH, Errno::EPERM => e
+          warn "Could not signal proxy (pid #{config.pid}): #{e.class}: #{e.message}"
         ensure
           config.clear_pid!
         end

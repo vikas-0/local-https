@@ -7,7 +7,8 @@ Gem::Specification.new do |spec|
   spec.email         = ["vikas_kr@live.in"]
 
   spec.summary       = "Run any local app with HTTPS and a custom domain"
-  spec.description   = "A simple Ruby CLI that generates mkcert certificates, updates /etc/hosts, and runs a HTTPS reverse proxy to your localhost apps."
+  spec.description   = "A simple Ruby CLI that generates mkcert certificates, " \
+                       "updates /etc/hosts, and runs a HTTPS reverse proxy to your localhost apps."
   spec.homepage      = "https://github.com/vikas-0/local-https"
   spec.license       = "MIT"
 

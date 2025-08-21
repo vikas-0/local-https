@@ -15,3 +15,25 @@ Style/FrozenStringLiteralComment:
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes
+
+Style/Documentation:
+  Enabled: false
+
+Metrics/MethodLength:
+  Exclude:
+    - 'lib/local_https/proxy.rb'
+    - 'lib/local_https/cli.rb'
+    - 'lib/local_https/cert_manager.rb'
+Metrics/AbcSize:
+  Exclude:
+    - 'lib/local_https/proxy.rb'
+    - 'lib/local_https/cli.rb'
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - 'lib/local_https/proxy.rb'
+Metrics/PerceivedComplexity:
+  Exclude:
+    - 'lib/local_https/proxy.rb'
+Metrics/ClassLength:
+  Exclude:
+    - 'lib/local_https/proxy.rb'

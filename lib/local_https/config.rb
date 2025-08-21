@@ -9,7 +9,7 @@ module LocalHttps
     DEFAULT_DIR = begin
       if ENV["LOCAL_HTTPS_HOME"]
         File.expand_path(ENV["LOCAL_HTTPS_HOME"])
-      elsif ENV["SUDO_USER"] && Process.uid == 0
+      elsif ENV["SUDO_USER"] && Process.uid.zero?
         File.join(Etc.getpwnam(ENV["SUDO_USER"]).dir, ".local-https")
       else
         File.expand_path("~/.local-https")
