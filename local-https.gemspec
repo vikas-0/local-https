@@ -3,12 +3,12 @@
 Gem::Specification.new do |spec|
   spec.name          = "local-https"
   spec.version       = File.read(File.expand_path("lib/local_https/VERSION", __dir__)).strip
-  spec.authors       = ["Your Name"]
-  spec.email         = ["you@example.com"]
+  spec.authors       = ["Vikas Kumar"]
+  spec.email         = ["vikas_kr@live.in"]
 
   spec.summary       = %q{Run any local app with HTTPS and a custom domain}
   spec.description   = %q{A simple Ruby CLI that generates mkcert certificates, updates /etc/hosts, and runs a HTTPS reverse proxy to your localhost apps.}
-  spec.homepage      = "https://github.com/yourname/local-https"
+  spec.homepage      = "https://github.com/vikas-0/local-https"
   spec.license       = "MIT"
 
   spec.files         = Dir.chdir(File.expand_path(__dir__)) do
