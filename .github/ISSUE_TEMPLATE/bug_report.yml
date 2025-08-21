@@ -1,0 +1,38 @@
+name: Bug report
+description: Report a bug to help us improve
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Please provide step-by-step instructions
+      placeholder: |
+        1. Run `local-https add ...`
+        2. Run `sudo local-https start`
+        3. Open https://...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `local-https --version` (or gem version)
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      description: macOS/Linux and version
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Output
+      description: Paste relevant logs or errors
+      render: shell
