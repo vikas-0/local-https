@@ -9,6 +9,15 @@ Run any local app with HTTPS and a custom domain.
 
 ## Install
 
+Homebrew (Tap):
+
+```bash
+brew tap vikas-0/tap
+brew install vikas-0/tap/local-https
+```
+
+Manual (from source):
+
 ```bash
 ./install.sh
 ```
